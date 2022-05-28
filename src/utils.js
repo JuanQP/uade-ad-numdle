@@ -1,3 +1,7 @@
+export const OK_EMOJI = 'O';
+export const ALMOST_EMOJI = '|';
+export const MISS_EMOJI = 'X';
+
 function range(max) {
   return [...Array(max).keys()];
 }
@@ -37,14 +41,18 @@ export function tryNumber(number, secretNumber) {
     correct: 0,
     almost: 0,
     miss: 0,
+    emoji: '',
   };
   [...number].forEach((digit, i) => {
     if(digit === secretNumber[i]) {
       result.correct++;
+      result.emoji += OK_EMOJI;
     } else if(secretNumber.includes(digit)) {
       result.almost++;
+      result.emoji += ALMOST_EMOJI;
     } else {
       result.miss++;
+      result.emoji += MISS_EMOJI;
     }
   });
   return result;

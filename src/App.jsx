@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
-import { Appbar, Button, Headline, Modal, Portal, Snackbar, Switch, Text, TextInput, Title, useTheme } from 'react-native-paper';
-import { formatResult, is4Digits, randomSecretNumber, randomSecretNumberWithoutRepeat, tryNumber } from './utils';
+import { Appbar, Button, Headline, Modal, Portal, Snackbar, Switch, Text, TextInput, Title } from 'react-native-paper';
+import { is4Digits, randomSecretNumber, randomSecretNumberWithoutRepeat, tryNumber } from './utils';
+import AttemptRow from './components/AttemptRow';
 
 const MAX_DIGITS = 4;
 const MAX_ATTEMPTS = 10;
 const WELCOME_MESSAGE = '👇 Presioná el botón de abajo para jugar';
 
 export default function App() {
-  const { colors } = useTheme();
   const [attempts, setAttempts] = useState([]);
-  const [lastAttempt, setLastAttempt] = useState(null);
   const [number, setNumber] = useState('');
   const [withRepeatedNumbers, setWithRepeatedNumbers] = useState(true);
   const [secretNumber, setSecretNumber] = useState('XXXX');
@@ -20,6 +19,7 @@ export default function App() {
   const [message, setMessage] = useState(WELCOME_MESSAGE);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [wordleMode, setWordleMode] = useState(false);
 
   function onDismissSnackBar() {
     setSnackbarVisible(false);
@@ -43,9 +43,8 @@ export default function App() {
     }
     const result = tryNumber(number, secretNumber);
     setNumber('');
-    const newAttemps = [...attempts, result];
+    const newAttemps = [result, ...attempts];
     setAttempts(newAttemps);
-    setLastAttempt(result);
 
     if(result.correct === MAX_DIGITS) {
       setIsPlaying(false);
@@ -66,7 +65,6 @@ export default function App() {
     setAttempts([]);
     setIsPlaying(true);
     setHasWon(false);
-    setLastAttempt(null);
   }
 
   function gameOver() {
@@ -79,6 +77,10 @@ export default function App() {
     setWithRepeatedNumbers(!withRepeatedNumbers);
   }
 
+  function handleToggleWordleModeSwitch() {
+    setWordleMode(!wordleMode);
+  }
+
   return (
     <>
       <Appbar.Header>
@@ -89,7 +91,7 @@ export default function App() {
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
           <View style={{ alignItems: 'center'}}>
-            <Title>Número {isPlaying ? 'XXXX' : secretNumber}</Title>
+            <Title>Número {isPlaying && false ? 'XXXX' : secretNumber}</Title>
           </View>
           <View style={{ alignSelf: 'stretch'}}>
             <TextInput
@@ -107,38 +109,16 @@ export default function App() {
           </View>
           <View style={{ flexGrow: 1, marginTop: 10 }}>
             <Headline style={{ alignSelf: 'center' }}>Intentos</Headline>
-            {attempts.slice(0, -1).map((attempt, i) => (
-              <View
+            {attempts.map((attempt, i) => (
+              <AttemptRow
                 key={i}
-                style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}
-              >
-                <Text style={styles.attemptText}>
-                  #{String(i+1).padStart(2, '0')}
-                </Text>
-                <Text style={styles.attemptText}>
-                  {attempt.number}
-                </Text>
-                <Text style={styles.attemptText}>
-                  {formatResult(attempt)}
-                </Text>
-              </View>
+                attemptNumber={attempts.length - i}
+                attempt={attempt}
+                wordleMode={wordleMode}
+                hasWon={hasWon}
+                firstRow={i === 0}
+              />
             ))}
-            {/* Last attempt has a different style */}
-            {lastAttempt && (
-              <View
-                style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}
-              >
-                <Text style={{...styles.lastAttemptText, color: hasWon ? 'teal' : colors.primary}}>
-                  #{String(attempts.length).padStart(2, '0')}
-                </Text>
-                <Text style={{...styles.lastAttemptText, color: hasWon ? 'teal' : colors.primary}}>
-                  {lastAttempt.number}
-                </Text>
-                <Text style={{...styles.lastAttemptText, color: hasWon ? 'teal' : colors.primary}}>
-                  {formatResult(lastAttempt)}
-                </Text>
-              </View>
-            )}
           </View>
           <View style={{ alignItems: 'center', marginVertical: 5 }}>
             <Text style={{ textAlign: 'center' }}>{message}</Text>
@@ -172,7 +152,13 @@ export default function App() {
                 disabled={isPlaying}
               />
             </View>
-
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Modo Wordle</Text>
+              <Switch
+                value={wordleMode}
+                onValueChange={handleToggleWordleModeSwitch}
+              />
+            </View>
           </Modal>
         </Portal>
         <Snackbar
@@ -199,19 +185,4 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 10,
   },
-  lastAttemptText: {
-    textShadowColor: 'black',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-    fontSize: 20,
-  },
-  hasWonText: {
-    textShadowColor: 'teal',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  attemptText: {
-    color: '#363636',
-    fontSize: 18,
-  }
 });
