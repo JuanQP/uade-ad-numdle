@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Appbar, Button, Headline, Modal, Portal, Snackbar, Switch, Text, TextInput, Title } from 'react-native-paper';
-import { is4Digits, randomSecretNumber, randomSecretNumberWithoutRepeat, tryNumber } from './utils';
 import AttemptRow from './components/AttemptRow';
+import { is4Digits, randomSecretNumber, randomSecretNumberWithoutRepeat, Result, tryNumber } from './utils';
 
 const MAX_DIGITS = 4;
 const MAX_ATTEMPTS = 10;
 const WELCOME_MESSAGE = '👇 Presioná el botón de abajo para jugar';
 
 export default function App() {
-  const [attempts, setAttempts] = useState([]);
+  const [attempts, setAttempts] = useState<Result[]>([]);
   const [number, setNumber] = useState('');
   const [withRepeatedNumbers, setWithRepeatedNumbers] = useState(true);
   const [secretNumber, setSecretNumber] = useState('XXXX');
@@ -91,7 +91,7 @@ export default function App() {
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
           <View style={{ alignItems: 'center'}}>
-            <Title>Número {isPlaying && false ? 'XXXX' : secretNumber}</Title>
+            <Title>Número {isPlaying ? 'XXXX' : secretNumber}</Title>
           </View>
           <View style={{ alignSelf: 'stretch'}}>
             <TextInput

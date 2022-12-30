@@ -1,15 +1,20 @@
 import React from 'react';
 import { StyleSheet, View } from "react-native";
-import { Avatar, IconButton } from "react-native-paper";
-import { ALMOST_EMOJI, OK_EMOJI } from '../utils';
+import { Avatar } from "react-native-paper";
+import { ALMOST_EMOJI, OK_EMOJI, Result } from '../utils';
 
-function formatColor(character) {
+function formatColor(character: string) {
   if(character === OK_EMOJI) return 'green';
   if(character === ALMOST_EMOJI) return 'gold';
   return 'gray';
 }
 
-function IconResult({ attempt, firstRow }) {
+interface Props {
+  attempt: Result;
+  firstRow: boolean;
+}
+
+function IconResult({ attempt, firstRow }: Props) {
   return (
     <View style={{ flexDirection: 'row' }}>
       <Avatar.Icon size={firstRow ? 35 : 25} style={styles.icon} icon="square" color={formatColor(attempt.emoji.charAt(0))} />
